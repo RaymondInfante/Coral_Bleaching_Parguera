@@ -9,13 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, message=FALSE, echo=FALSE, warning=FALSE}
-#Packages
-```
-
-
-```{r, message=FALSE, echo=FALSE, warning=FALSE}
-```
 
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
@@ -23,6 +16,7 @@ library(tidyverse)
 library(lubridate)
 library(performance)
 library(scales)
+library(ggmap)
 ```
 
 
@@ -123,11 +117,11 @@ CoralTemp %>%
   annotate("text",  x = as.POSIXct("1994-08-02 12:00:00"), y = 8.2, label = "Severe Bleaching", color = "red")+
   theme_classic()
 
-#Combined lab report discussing SST icnrease and coral bleaching historically and into the future
+#Combined lab report discussing SST increase and coral bleaching historically and into the future
 
-#Figure 1: Plot of all SST temperature data
-#Figure 2: Climatology of monthly mean SST data
-#Figure 3: Plot of years we predict coral bleaching
+#Figure 1: Plot of all SST temperature data ###DONE
+#Figure 2: Climatology of monthly mean SST data ###DONE
+#Figure 3: Plot of years we predict coral bleaching ###DONE
 #Figure 4: Future projections of SST/bleaching (in class next week)
 
   
@@ -136,4 +130,95 @@ CoralTemp %>%
 
 Coral temp and motivation of quantifying ocean warming on coral bleaching in La Parguera.
 
-Describe the figure above relating SST increase in La Parguera since 1985. 
+In this assignment we are using the [NOAA](https://www.nesdis.noaa.gov/news/information-noaas-satellite-fleet-helps-point-how-warming-ocean-temperatures-impact-marine) VIIRS and SUOMI-NPP satellite data via [Ocean Watch](https://oceanwatch.pifsc.noaa.gov/erddap/griddap/CRW_sst_v3_1_monthly.html), obtaining the Sea surface Temperature, to study Coral Bleaching in La Parguera National Reserve. Coral Bleaching, is when corals expels there zooxanthellae due to stress. There are multiple factors stressing corals, some of this are: low tides, excesive sunlight, pollution and the most common, high temperatures. According to [NOAA](https://coralreefwatch.noaa.gov/satellite/education/tutorial/crw24_dhw_product.php), corals are sensible to temperature warmer than 1°C above the highest summer SST, when passing this threshold, coral bleaching get stressed, expelling there symbiotic algae. If corals doesn't have the algae for an extended amount of time, this can die. Creating in turn a negative chain reaction in reefs dependent organisms. It's important to monitor continuously the SST to understand and predict Coral Bleaching. 
+
+
+Describe each figures 5 sentences. 
+
+Figure 1: Plot of all SST temperature data ###DONE
+
+```{r}
+CoralTemp_predict %>% 
+  ggplot()+
+  geom_line(aes(datetime, CRW_SST), size = 0.8, color = "#68a1fc", alpha = 0.6)+
+  geom_line(aes(datetime, fit), color = "purple")+
+  geom_ribbon(aes(x = datetime, ymin = lwr, ymax = upr), fill = "purple", alpha = 0.2, size = 1)+
+  labs(x = "Year", y = "Sea Surface Temperature (°C)")+
+  scale_x_datetime(labels = date_format("%Y"),
+                   breaks = date_breaks("5 years"),
+                   limits = as_datetime(c("1983-01-01 UTC", "2025-01-01 UTC")),
+                   expand = c(0,0))+
+  scale_y_continuous(limits = c(25,31), breaks = seq(25,31,1))+
+  theme_classic()+ 
+  theme(text = element_text(size = 14)) + theme(axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    axis.text.x = element_text(colour = "black"),
+    axis.text.y = element_text(colour = "black"),
+    plot.title = element_text(size = 19)) + theme(panel.background = element_rect(fill = "aliceblue"))
+
+
+```
+
+A significant (p<0.001) increase of SST over the years in La Parguera had been detected from a linear model. This temperature increase over the years, evidence that climate change is real, and that the ocean enviorment could be in a possible danger if this trends continue. 
+
+
+
+
+Figure 2: Climatology of monthly mean SST data ###DONE
+
+```{r}
+coral_temp_climatology %>% 
+  ggplot(aes(month,Mean))+
+  geom_line(size = 1.3, alpha = 0.8, color = "#68a1fc")+
+  geom_ribbon(aes(x  = month, y = Mean, ymin = Mean-SD, ymax = Mean+SD),fill = "#a36af7",alpha = 0.3) +
+  theme_classic()+
+  labs(y = "Sea Surface Temperature (°C)", x = "Month") + theme(axis.title = element_text(size = 15),
+    axis.text = element_text(size = 13, colour = "black"),
+    axis.text.x = element_text(colour = "black"))+
+  scale_x_continuous(limits = c(1,12), breaks = seq(1,12,1))+
+  scale_y_continuous(limits = c(25,30),breaks = seq(25,30,1)) + theme(panel.background = element_rect(fill = "aliceblue"))
+```
+The lowest mean SST detected are in the month of february, meanwhile the highest mean SST found was on september. There is a seasonally pattern with lower temperature from January-march and then an increase from april to September. After September, the SST starts decreasing until March. 
+
+Figure 3: Plot of years we predict coral bleaching ###DONE
+
+```{r}
+CoralTemp %>% 
+  ggplot()+
+  geom_line(aes(x = datetime, y = CRW_DHW))+
+  geom_hline(aes(yintercept = 4), color = "orange")+
+  geom_hline(aes(yintercept = 8), color = "red")+
+  annotate("text", x = as.POSIXct("2005-10-15 12:00:00"), y = 5.9, label = "2005")+
+  annotate("text", x = as.POSIXct("2010-09-17 12:00:00"), y = 5.4, label = "2010")+
+  annotate("text",  x = as.POSIXct("1994-08-02 12:00:00"), y = 4.5, label = "Significant Bleaching", color = "orange", size = 7)+
+  annotate("text",  x = as.POSIXct("1994-08-02 12:00:00"), y = 8.5, label = "Severe Bleaching", color = "red", size = 7)+
+  theme_classic()+
+  labs(x = "Year", y = "Degree Heating Week") + theme(panel.background = element_rect(fill = "aliceblue")) + theme(axis.title = element_text(size = 17),
+    axis.text = element_text(size = 14, colour = "black")) + theme(axis.title = element_text(size = 16),
+    axis.text = element_text(size = 15))
+```
+According to [NOAA](https://coralreefwatch.noaa.gov/satellite/education/tutorial/crw24_dhw_product.php) the Degree Heating Week is a measure of how far the in time the ocean temperature is above the highest summer mean threshold for Coral Bleaching. If this number is 4, significant bleaching can be seeing. If is reaches 8, severe bleaching could be reported. 
+
+This Figures shows that in 2005 and 2010 the DHW passes 4. According to [NOAA](https://www.climate.gov/news-features/featured-images/coral-bleaching-could-be-severe-2005-event#:~:text=In%202005%2C%20many%20areas%20of,percent%20later%20died%20from%20disease.), at 2005 a many areas of the Caribbean experienced an extended thermal stressed that caused coral bleaching and at the same time dead, this evidenced the 2005 peek in La Parguera. The 2010 peek had also be reported by NOAA as an global Coral Bleaching event.  
+
+Figure 4: Future projections of SST/bleaching (in class next week)
+
+
+Coral Temp map
+
+```{r}
+
+register_google(key = "AIzaSyCN77uGdKAxmR71Xf4jinOnehFwkGnLBmM")
+
+Coral_map = CoralTemp %>% 
+  na.omit()
+  
+  
+ggmap(get_map(c(lon = -67.075, lat = 17.975), zoom = 13, maptype = "satellite"))+
+  geom_point(data = Coral_map, aes(x =longitude, y =latitude), color = "lightblue")
+  
+
+max(CoralTemp$longitude)
+CoralTemp$latitude
+```
+
